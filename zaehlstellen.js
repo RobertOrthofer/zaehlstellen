@@ -161,15 +161,46 @@ function add_zaehlstellen(coords_json)
 		output.push('<li><strong>', escape(f.name), '</strong>  - ',
 		f.size, ' bytes, last modified: ',
 		f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a','</li>');
+			
+			coords_json ={};
+			var reader = new FileReader(); // to read the FileList object
+			reader.onload = function(event){  // Reader ist asynchron, wenn reader mit operation fertig ist, soll das hier (JSON.parse) ausgeführt werden, sonst ist es noch null
+				if (f.name.substr(f.name.length - 3) ==="csv"){ // check if filetiype is csv
+					coords_json = csvJSON(reader.result);
+				}
+				else {
+					coords_json = JSON.parse(reader.result);
+				}
+				add_zaehlstellen(coords_json);
+			};
+			reader.readAsText(f,"UTF-8"); 
 
-		var reader = new FileReader(); // to read the FileList object
-		reader.onload = function(event){  // Reader ist asynchron, wenn reader mit operation fertig ist, soll das hier (JSON.parse) ausgeführt werden, sonst ist es noch null
-			var coords_json = JSON.parse(reader.result);
-			add_zaehlstellen(coords_json);
-		};
-		reader.readAsText(f);
-
-		document.getElementById('list_coords').innerHTML = '<ul>' + output.join('') + '</ul>';
+			document.getElementById('list_coords').innerHTML = '<ul>' + output.join('') + '</ul>';
+		}
+	
+	// convert .csv to .json
+	function csvJSON(csv){ //csv = reader.result
+			var lines=csv.split(/\r?\n/);
+			//var result = [];
+			var headers=lines[0].split(",");
+			 
+			var obj_array = []
+			for(var i=1;i<lines.length;i++){
+				var json_obj = {"type": "Feature"};
+				var currentline=lines[i].split(",");  
+				//for(var j=0;j<headers.length;j++){
+					json_obj["geometry"] = {
+							"type" : "Point",
+							"coordinates" : [currentline[1], currentline[2]]};
+					json_obj["properties"] = {"zaehlstelle" : currentline[0]}; // not variable yet, in progress
+					obj_array.push(json_obj);
+			};
+			
+		var complete_geojson = {"type":"FeatureCollection",
+								"features": obj_array // all objects of the csv
+								}
+		alert(complete_geojson);
+		return complete_geojson; //return geoJSON
 	}
 
 	function handleFileSelect2(evt) {
