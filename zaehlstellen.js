@@ -734,7 +734,7 @@ function askFields(first_feature, option){
 //	var dropZoneHeight = document.getElementById("drop_zone_holder").offsetHeight +17;
 
 //	document.getElementById('choseFieldDiv1').style.bottom= document.getElementById("hideSelectionHolder").getBoundingClientRect().y +17;
-
+ hideSelection("hideCoordSelection");
 
 
 	switch(option)
@@ -793,7 +793,7 @@ function askFields(first_feature, option){
 
 // show/hide current Selection-DIV (ID = id of clicked button)
 function hideSelection(ID){
-	/*
+	console.log("hide/show Selection: " + ID);
 	var otherID ="";
 	if (ID ==="hideCoordSelection") {otherID ="hideDataSelection"}
 	else {otherID = "hideCoordSelection"}
@@ -803,14 +803,15 @@ function hideSelection(ID){
 	// if selection-Div is hidden, show it, and hide the other div
 	if(document.getElementById(ID).innerHTML == "▽"){
 		document.getElementById(ID).innerHTML = "△";
-		document.getElementById('choseFieldDiv1').style.transform = "translateY(100%)";
+		document.getElementById('choseFieldDiv1').style.transform = "translateY(90px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(0px)";
 	}
 
 	// if selection-Div is shown, hide it
 	else{
 		document.getElementById(ID).innerHTML = "▽";
-		document.getElementById('choseFieldDiv1').style.transform = "translateY(00%)";
+		document.getElementById('choseFieldDiv1').style.transform = "translateY(0px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(-90px)";
 	}
 
-*/
 }
