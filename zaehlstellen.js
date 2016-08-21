@@ -1,7 +1,12 @@
 
-//------------ Funktion initMap() für die Karte--------------------------------------------------------------------- -->
+
 	var map;
 	var viewpoint;
+
+
+	//import Chart from './node_modules/chart.js/src/chart.js';
+
+	//------------ Funktion initMap() für die Karte--------------------------------------------------------------------- -->
 	function initMap() {
 		map = new ol.Map({target: "map"});
 
@@ -82,7 +87,7 @@ function add_zaehlstellen(coords_json)
 	if (typeof(zaehlstellen_data)!== "undefined"){
 		updateStyle(0);
 		updateInput(0, false, false);
-		document.getElementById("sliderDiv").style.display= 'block';
+		document.getElementById("sliderDiv").style.display= 'inline-block';
 	}
 
 }
@@ -161,7 +166,7 @@ function add_zaehlstellen(coords_json)
 		output.push('<li><strong>', escape(f.name), '</strong>  - ',
 		f.size, ' bytes, last modified: ',
 		f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a','</li>');
-			
+
 			coords_json ={};
 			var reader = new FileReader(); // to read the FileList object
 			reader.onload = function(event){  // Reader ist asynchron, wenn reader mit operation fertig ist, soll das hier (JSON.parse) ausgeführt werden, sonst ist es noch null
@@ -171,23 +176,24 @@ function add_zaehlstellen(coords_json)
 				else {
 					coords_json = JSON.parse(reader.result);
 				}
+				askFields(coords_json.features[0], 1);  // only first feature is needed for property names
 				add_zaehlstellen(coords_json);
 			};
-			reader.readAsText(f,"UTF-8"); 
+			reader.readAsText(f,"UTF-8");
 
-			document.getElementById('list_coords').innerHTML = '<ul>' + output.join('') + '</ul>';
+			document.getElementById('list_coords').innerHTML = '<ul style="margin: 0px;">' + output.join('') + '</ul>';
 		}
-	
+
 	// convert .csv to .json
 	function csvJSON(csv){ //csv = reader.result
 			var lines=csv.split(/\r?\n/);
 			//var result = [];
 			var headers=lines[0].split(",");
-			 
+
 			var obj_array = []
 			for(var i=1;i<lines.length;i++){
 				var json_obj = {"type": "Feature"};
-				var currentline=lines[i].split(",");  
+				var currentline=lines[i].split(",");
 				//for(var j=0;j<headers.length;j++){
 					json_obj["geometry"] = {
 							"type" : "Point",
@@ -195,7 +201,7 @@ function add_zaehlstellen(coords_json)
 					json_obj["properties"] = {"zaehlstelle" : currentline[0]}; // not variable yet, in progress
 					obj_array.push(json_obj);
 			};
-			
+
 		var complete_geojson = {"type":"FeatureCollection",
 								"features": obj_array // all objects of the csv
 								}
@@ -219,6 +225,9 @@ function add_zaehlstellen(coords_json)
 		var reader = new FileReader(); // to read the FileList object
 		reader.onload = function(event){  // Reader ist asynchron, wenn reader mit operation fertig ist, soll das hier (JSON.parse) ausgeführt werden, sonst ist es noch null
 			zaehlstellen_data = JSON.parse(reader.result);  // global, unsauber?
+
+			askFields(zaehlstellen_data[0], 2);  // only first feature is needed for property names
+
 			makeDateObjects(zaehlstellen_data);
 			selectedWeekdays = [0,1,2,3,4,5,6]; // select all weekdays before timeslider gets initialized
 			init_timeslider(zaehlstellen_data);
@@ -228,7 +237,7 @@ function add_zaehlstellen(coords_json)
 				if (layer.get('name') == 'zaehlstellen') {
 				  updateStyle(0);
 				  updateInput(0, false, false);
-				  document.getElementById("sliderDiv").style.display= 'block';
+				  document.getElementById("sliderDiv").style.display= 'inline-block';
 				}
 			});
 		};
@@ -713,3 +722,95 @@ function autoPlay(){
 			document.getElementById("auto_play_button").innerHTML = "Auto-Play &#9658";
 		}
 };
+
+function askFields(first_feature, option){
+	// Populating Selections for ID and Coordinates of Data after Drag&Drop
+	// @option:
+	//		1: Coordinates
+	// 		2: Data
+
+	// Set up DIV for Selection according to variable DropZone (better Method?)
+//	var SelectionPosition = document.getElementById("hideSelectionHolder").getBoundingClientRect().y;
+//	var dropZoneHeight = document.getElementById("drop_zone_holder").offsetHeight +17;
+
+//	document.getElementById('choseFieldDiv1').style.bottom= document.getElementById("hideSelectionHolder").getBoundingClientRect().y +17;
+
+
+
+	switch(option)
+	{
+		case 1:  // = coordinates-json
+		{
+			var coordIDSelection = document.getElementById('coordIDSelect');
+			var coordSelection = document.getElementById('coordSelect');
+			index = 0;
+
+			Object.keys(first_feature).forEach(function(prop) {  // prop = property name
+				//console.log(prop);
+				if(typeof(first_feature[prop]) === "object"){ // if Object is nested, go into next level
+					//console.log(prop + " is an object");
+					Object.keys(first_feature[prop]).forEach(function(prop_nested){
+						//console.log(prop + ": " + prop_nested);
+						var opt = document.createElement("option");
+						opt.value= [prop, prop_nested];
+						opt.innerHTML = prop + ": " + prop_nested; // whatever property it has
+
+						coordIDSelection.appendChild(opt);
+						var opt2 = opt.cloneNode(true); // clone Options for other Selection
+						coordSelection.appendChild(opt2);
+						index++;
+					});
+				}
+				else{ // if current Object is not nested...
+					var opt = document.createElement("option");
+					opt.value= [prop];
+					opt.innerHTML = prop; // whatever property it has
+
+					coordIDSelection.appendChild(opt);
+					var opt2 = opt.cloneNode(true); // clone Options for other Selection
+					coordSelection.appendChild(opt2);
+
+					index++;
+				}
+			});
+
+			// Behavior of sliding Div and show/hide-Buttons depending on option
+				document.getElementById("hideCoordSelection").style.display="inline-block";
+				document.getElementById("hideCoordSelection").innerHTML = "△";
+//				document.getElementById('choseFieldDiv1').style.transform = "translateY(90px)";
+		}  // end of case 1 (=coordinates-Json)
+		break;
+
+		case 2: //(= Data-json)
+		{
+			document.getElementById("hideDataSelection").style.display="inline-block";
+			document.getElementById("hideDataSelection").innerHTML = "△";
+//			document.getElementById('choseFieldDiv1').style.transform = "translateY(90px)";
+		}	// ned of case 2 (=Data-json)
+		break;
+	}// end of switch
+}
+
+// show/hide current Selection-DIV (ID = id of clicked button)
+function hideSelection(ID){
+	/*
+	var otherID ="";
+	if (ID ==="hideCoordSelection") {otherID ="hideDataSelection"}
+	else {otherID = "hideCoordSelection"}
+
+	//var dropZoneHeight = document.getElementById("drop_zone_holder").offsetHeight + document.getElementById("hideSelectionHolder");
+
+	// if selection-Div is hidden, show it, and hide the other div
+	if(document.getElementById(ID).innerHTML == "▽"){
+		document.getElementById(ID).innerHTML = "△";
+		document.getElementById('choseFieldDiv1').style.transform = "translateY(100%)";
+	}
+
+	// if selection-Div is shown, hide it
+	else{
+		document.getElementById(ID).innerHTML = "▽";
+		document.getElementById('choseFieldDiv1').style.transform = "translateY(00%)";
+	}
+
+*/
+}

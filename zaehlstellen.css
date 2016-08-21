@@ -29,19 +29,25 @@
 
 	#json_info_div{
 		width: 90%;
-		margin-right: 10px;
+		margin-right: 5%;
+		margin-left: 5%
+		border: 0px;
+		padding: 0px;
 	}
 
 	.list{
+		margin: 0px;
 		font-size: 12px;
 		text-align: left;
 	}
 
 
 	#sliderDiv{
+		position: relative;
+		width: 100%;
 		text-align: center;
-		padding-right: 15px;
-		padding-left: 15px;
+		padding-right: 0px;
+		padding-left: 0px;
 	}
 	/*
 	#time_slider{
@@ -63,10 +69,14 @@
 	}
 
 	#drop_zone_holder{
-			width: 100%;
-			display: table;
-			border-collapse: separate;
-			border-spacing: 10px;
+		position: relative;
+		top: 0px;
+		z-index: 10;
+		background-color: white;
+		width: 100%;
+		display: table;
+		border-collapse: separate;
+		border-spacing: 10px;
 	}
 
 	.drop_zone{
@@ -78,7 +88,96 @@
 		border-style: dashed;
 		border-color: #222222;
 		background-color: #f0f6fb;
+	}
 
+	#hideSelectionHolder{
+		z-index: 11;
+		background-color: transparent;;
+		width: 100%;
+	}
+
+	.hideSelectionButton{
+		display: inline;
+		width: 50%;
+		height: 20px;
+		line-height: 12px;
+		border: none;
+	}
+
+	#hideCoordSelection{
+		float: left;
+		background-color: #4A74AA;
+		display: inline-block;
+	}
+
+	#hideDataSelection{
+		float: right;
+		background-color: #4A74AA;
+		display: inline-block;
+	}
+
+	.choseFieldDiv{
+		display: inline-block;
+		position: relative;;
+		padding: 0%;
+		padding-bottom: 0px;
+		height: 90px;
+		top: 0px;
+		z-index: 0;
+		text-align: left;
+		background-color: #A4C4E8;
+		width: 100%;
+		transition: transform 0.3s;
+	}
+
+	#choseFieldDiv1{
+		z-index: 1;
+	}
+
+	#choseFieldDiv2{
+		z-index: 2;
+	}
+
+	.single_selection{
+		background-color: #A4C4E8;
+		margin: 0;
+		border: 0;
+		padding: 0;
+		vertical-align: middle;
+		line-height: 40px;
+		height: 40px;
+	}
+
+	.fieldText{
+		float: left;
+		width: 27%;
+		text-align: right;
+		padding-right: 3%;
+	}
+
+	.styled-select {
+		float: right;
+		margin: 0px;
+		margin-top: 5px;
+		border: 0px;
+		padding: 0px;
+	  width: 60%;
+		height: 30px;
+	  overflow: hidden;
+		margin-right: 10%;
+	  background: #f0f6fb;
+	}
+
+	.styled-select select {
+   background: transparent;
+	 margin-right: 50px;
+   width: 100%;
+   padding: 0px;
+   font-size: 16px;
+   line-height: 1;
+   border: 0;
+   border-radius: 0;
+   -webkit-appearance: none;
 	}
 
 	#canvas_div{
