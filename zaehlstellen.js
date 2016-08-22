@@ -2,6 +2,9 @@
 
 	var map;
 	var viewpoint;
+	var selectedOptions = {} //global variable for selecting matching id, coordinate-field, epsg,...
+													// selectedOptions are arrays with property names (might be nested)
+													//(e.g.: ["properties", "zaehlstelle"])
 
 
 	//import Chart from './node_modules/chart.js/src/chart.js';
@@ -61,6 +64,12 @@
 //---- Zählstellenpunkte für Karte --------------------------------------------------------------------------->
 function add_zaehlstellen(coords_json)
 {
+	// save the current Selection to global variable selectedOptions, so they can only be changed with the apply button
+	var idField = document.getElementById("coordIDSelect").value.split(","); // array, because it might be nested
+	var coordsField = document.getElementById("coordSelect"). value.split(","); // array, because it might be nested
+	selectedOptions.coordID = idField;
+	selectedOptions.coordField = coordsField;
+
 	ZaehlstellenPoints = new ol.layer.Vector({
 		source: new ol.source.Vector({
 			features: (new ol.format.GeoJSON()).readFeatures(coords_json, { featureProjection: 'EPSG:3857' })
@@ -69,7 +78,7 @@ function add_zaehlstellen(coords_json)
 		}),
 		style: function(feature, resolution){
 			var geom = feature.getGeometry().getType();
-			var zaehlstelle = feature.get('zaehlstelle');
+			var id = feature.get(idField[1]);
 			return styles[geom];
 		}
 	});
@@ -83,7 +92,7 @@ function add_zaehlstellen(coords_json)
 		,
 	};
 	map.addLayer(ZaehlstellenPoints);
-	ZaehlstellenPoints.set('name', 'zaehlstellen');
+	ZaehlstellenPoints.set('name', idField[1]);
 	if (typeof(zaehlstellen_data)!== "undefined"){
 		updateStyle(0);
 		updateInput(0, false, false);
@@ -177,7 +186,9 @@ function add_zaehlstellen(coords_json)
 					coords_json = JSON.parse(reader.result);
 				}
 				askFields(coords_json.features[0], 1);  // only first feature is needed for property names
-				add_zaehlstellen(coords_json);
+				document.getElementById("renderCoordinatesButton").addEventListener('click', function(){add_zaehlstellen(coords_json);}, false);
+				console.log('added Event Listener to apply button');
+				//add_zaehlstellen(coords_json);
 			};
 			reader.readAsText(f,"UTF-8");
 
@@ -714,7 +725,7 @@ function autoPlay(){
 				interval_handle = setInterval(function(){
 						changeDateOneStep(1, true); // loop = true
 					}, 1000);
-			document.getElementById("auto_play_button").innerHTML = "Stop &#10074; &#10074;";
+			document.getElementById("auto_play_button").innerHTML = "Stop &#10074;&#10074;";
 		}
 		else{
 			clearInterval(interval_handle); // clear Interval
@@ -723,19 +734,12 @@ function autoPlay(){
 		}
 };
 
+//----------Populating Selections for ID and Coordinates after Drag&Drop--------------------------------------------------
 function askFields(first_feature, option){
-	// Populating Selections for ID and Coordinates of Data after Drag&Drop
 	// @option:
 	//		1: Coordinates
 	// 		2: Data
-
-	// Set up DIV for Selection according to variable DropZone (better Method?)
-//	var SelectionPosition = document.getElementById("hideSelectionHolder").getBoundingClientRect().y;
-//	var dropZoneHeight = document.getElementById("drop_zone_holder").offsetHeight +17;
-
-//	document.getElementById('choseFieldDiv1').style.bottom= document.getElementById("hideSelectionHolder").getBoundingClientRect().y +17;
- hideSelection("hideCoordSelection");
-
+	hideSelection("hideCoordSelection");
 
 	switch(option)
 	{
@@ -791,7 +795,7 @@ function askFields(first_feature, option){
 	}// end of switch
 }
 
-// show/hide current Selection-DIV (ID = id of clicked button)
+//------------- show/hide current Selection-DIV (ID = id of clicked button)------------------------------------------------------
 function hideSelection(ID){
 	console.log("hide/show Selection: " + ID);
 	var otherID ="";
@@ -803,7 +807,7 @@ function hideSelection(ID){
 	// if selection-Div is hidden, show it, and hide the other div
 	if(document.getElementById(ID).innerHTML == "▽"){
 		document.getElementById(ID).innerHTML = "△";
-		document.getElementById('choseFieldDiv1').style.transform = "translateY(90px)";
+		document.getElementById('choseFieldDiv1').style.transform = "translateY(100px)";
 		document.getElementById("menuBelowSelection").style.transform = "translateY(0px)";
 	}
 
@@ -811,7 +815,7 @@ function hideSelection(ID){
 	else{
 		document.getElementById(ID).innerHTML = "▽";
 		document.getElementById('choseFieldDiv1').style.transform = "translateY(0px)";
-		document.getElementById("menuBelowSelection").style.transform = "translateY(-90px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(-100px)";
 	}
 
 }

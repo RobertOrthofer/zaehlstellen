@@ -104,6 +104,8 @@
 		line-height: 12px;
 		border: none;
 		z-index: 11;
+		cursor: pointer;
+		color: white;
 	}
 
 	#hideCoordSelection{
@@ -123,8 +125,8 @@
 		position: relative;;
 		padding: 0%;
 		padding-bottom: 0px;
-		height: 90px;
-		top: -90px;
+		height: 80px;
+		top: -100px;
 		z-index: 0;
 		text-align: left;
 		background-color: #A4C4E8;
@@ -140,15 +142,15 @@
 		z-index: 2;
 	}
 
-	.single_selection{
-		background-color: #A4C4E8;
-		margin: 0;
-		border: 0;
-		padding: 0;
-		vertical-align: middle;
-		line-height: 40px;
-		height: 40px;
-	}
+.single_selection{
+	background-color: #A4C4E8;
+	margin: 0;
+	border: 0;
+	padding: 0;
+	vertical-align: middle;
+	line-height: 40px;
+	height: 40px;
+}
 
 	.fieldText{
 		float: left;
@@ -183,8 +185,24 @@
    -webkit-appearance: none;
 	}
 
+	.renderButton{
+		background-color: #4A74AA;
+		border: none;
+		padding: 0px;
+		margin: 0px;
+		width: 100%;
+		height: 20px;
+		position: relative;
+		top: -11px;  /* warum 11*/
+		text-align: center;
+		line-height: 12px;
+		font-size: 12px;
+		cursor: pointer;
+		color: white;
+	}
+
 	#menuBelowSelection{
-		top: -90px;
+		top: -80px;
 		transition: transform 0.3s;
 	}
 
