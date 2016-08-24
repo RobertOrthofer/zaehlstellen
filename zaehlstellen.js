@@ -2,9 +2,14 @@
 
 	var map;
 	var viewpoint;
-	var selectedOptions = {} //global variable for selecting matching id, coordinate-field, epsg,...
+	var selectedOptions = {}; //global variable for selecting matching id, coordinate-field, epsg,...
 													// selectedOptions are arrays with property names (might be nested)
 													//(e.g.: ["properties", "zaehlstelle"])
+
+	var selectionStatus = {       // save state of JSON drop-down menu, so they dont have to be checked via DOM-queries
+		coords: false,
+		date: false
+	};
 
 
 	//import Chart from './node_modules/chart.js/src/chart.js';
@@ -123,7 +128,7 @@ function add_zaehlstellen(coords_json)
 
 		ZaehlstellenPoints.setStyle(function(feature, resolution){
 			var geom = feature.getGeometry().getType();  // geom = point
-			var zaehlstelle = feature.get('zaehlstelle');  // zaehlstelle = z.B. b0251
+			var zaehlstelle = feature.get(selectedOptions.coordID[1]);  // electedOptions.coordID[1] = z.B. b0251
 			var amount = zaehlstellen_data[y][zaehlstelle]; // amount = z.B. 1055
 			//example: min_max_zaehlstelle["b02501"][1] = maximum of b02501 of all days
 
@@ -162,7 +167,7 @@ function add_zaehlstellen(coords_json)
 		dropZone2.addEventListener('drop', handleFileSelect2, false);
 	}
 
-	//---------- Get File Reference ---------->
+	//---------- Handle File Selection (Coordinates-JSON)------------------------------------------------------>
 	function handleFileSelect1(evt) {
 		evt.stopPropagation();
 		evt.preventDefault();
@@ -185,9 +190,13 @@ function add_zaehlstellen(coords_json)
 				else {
 					coords_json = JSON.parse(reader.result);
 				}
+				document.getElementById("hideCoordSelection").style.visibility = "visible";
+				document.getElementById("renderCoordinatesButton").style.visibility = "visible";
+				document.getElementById("hideSelectionHolder").style.visibility = "visible";
+
 				askFields(coords_json.features[0], 1);  // only first feature is needed for property names
 				document.getElementById("renderCoordinatesButton").addEventListener('click', function(){add_zaehlstellen(coords_json);}, false);
-				console.log('added Event Listener to apply button');
+				//console.log('added Event Listener to apply button');
 				//add_zaehlstellen(coords_json);
 			};
 			reader.readAsText(f,"UTF-8");
@@ -216,10 +225,11 @@ function add_zaehlstellen(coords_json)
 		var complete_geojson = {"type":"FeatureCollection",
 								"features": obj_array // all objects of the csv
 								}
-		alert(complete_geojson);
+	//	alert(complete_geojson);
 		return complete_geojson; //return geoJSON
 	}
 
+// ------------- handle File drop of Data-JSON -------------------------------------------------------------->
 	function handleFileSelect2(evt) {
 		evt.stopPropagation();
 		evt.preventDefault();
@@ -236,6 +246,10 @@ function add_zaehlstellen(coords_json)
 		var reader = new FileReader(); // to read the FileList object
 		reader.onload = function(event){  // Reader ist asynchron, wenn reader mit operation fertig ist, soll das hier (JSON.parse) ausgeführt werden, sonst ist es noch null
 			zaehlstellen_data = JSON.parse(reader.result);  // global, unsauber?
+
+			document.getElementById("renderDataButton").style.visibility = "visible";
+			document.getElementById("hideDataSelection").style.visibility = "visible";
+			document.getElementById("hideSelectionHolder").style.visibility = "visible";
 
 			askFields(zaehlstellen_data[0], 2);  // only first feature is needed for property names
 
@@ -534,7 +548,11 @@ function createPolyChart(selectedFeatures){
 	}
 	// make div visible if something is in it
 	if (selectedFeatures.length > 0 || (typeof(snapshotArray) != "undefined" && snapshotArray.length >0)){
-		document.getElementById("canvas_div").style.visibility = 'visible';
+	//	document.getElementById("canvas_div").style.visibility = 'visible';
+			document.getElementById("canvas_div").style.display = "block";
+	}
+	else{
+		document.getElementById("canvas_div").style.display = "none";
 	}
 };
 
@@ -739,7 +757,7 @@ function askFields(first_feature, option){
 	// @option:
 	//		1: Coordinates
 	// 		2: Data
-	hideSelection("hideCoordSelection");
+	option == 1 ? showCoordsSelection() : showDateSelection();
 
 	switch(option)
 	{
@@ -796,13 +814,62 @@ function askFields(first_feature, option){
 }
 
 //------------- show/hide current Selection-DIV (ID = id of clicked button)------------------------------------------------------
-function hideSelection(ID){
+function showCoordsSelection(){
+	// if other selection is open, close it
+	if (selectionStatus.date == true){ showDateSelection(); };
+
+	console.log("hide/show Coordinate Selection ");
+
+	// calculating direction of div (up or down)
+	if (selectionStatus.coords == false){
+		document.getElementById("hideCoordSelection").innerHTML = "△";
+		document.getElementById('choseFieldDiv1').style.transform = "translateY(100px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(0px)";
+		selectionStatus.coords = true;
+	}
+	else {
+		document.getElementById("hideCoordSelection").innerHTML = "▽";
+		document.getElementById('choseFieldDiv1').style.transform = "translateY(0px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(-100px)";
+		selectionStatus.coords = false;
+	}
+}
+
+
+
+function showDateSelection(){
+	// if other selection is open, close it
+	if (selectionStatus.coords == true){ showCoordsSelection(); };
+
+	console.log("hide/show Data Selection ");
+
+	// calculating direction of div (up or down)
+	if (selectionStatus.date == false){
+		document.getElementById("hideDataSelection").innerHTML = "△";
+		document.getElementById('choseFieldDiv2').style.transform = "translateY(60px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(0px)";
+		selectionStatus.date = true;
+	}
+	else {
+		document.getElementById("hideDataSelection").innerHTML = "▽";
+		document.getElementById('choseFieldDiv2').style.transform = "translateY(0px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(-60px)";
+		selectionStatus.date = false;
+	}
+}
+
+
+
+/*
+	// if other selection is open, close it
+	if (selectionStatus.coords == true){ showDateSelection(); };
+
 	console.log("hide/show Selection: " + ID);
 	var otherID ="";
 	if (ID ==="hideCoordSelection") {otherID ="hideDataSelection"}
 	else {otherID = "hideCoordSelection"}
 
-	//var dropZoneHeight = document.getElementById("drop_zone_holder").offsetHeight + document.getElementById("hideSelectionHolder");
+	//var dropZoneHeight = document.getElementById("drop_zone_holder").offsetHeight + document.getElementById("showCoordsSelectionHolder");
 
 	// if selection-Div is hidden, show it, and hide the other div
 	if(document.getElementById(ID).innerHTML == "▽"){
@@ -817,5 +884,5 @@ function hideSelection(ID){
 		document.getElementById('choseFieldDiv1').style.transform = "translateY(0px)";
 		document.getElementById("menuBelowSelection").style.transform = "translateY(-100px)";
 	}
-
 }
+*/

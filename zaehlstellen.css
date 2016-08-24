@@ -5,6 +5,11 @@
 		margin: 0;
 		background-color: #ffffff;
 		font-family: Verdana, Geneva, sans-serif;
+
+		/* trying to remove font-flickering after translation of menu */
+		-webkit-backface-visibility: hidden;
+		-webkit-font-smoothing: antialiased;
+		-webkit-transform: translateZ(0px);
 	}
 
 	.map {
@@ -91,9 +96,12 @@
 	}
 
 	#hideSelectionHolder{
-		z-index: 11;
-		background-color: transparent;;
+		height: 20px;
+		position: relative;
+		z-index: 120;
+		background-color: #4A74AA;
 		width: 100%;
+		visibility: hidden;
 	}
 
 	.hideSelectionButton{
@@ -108,16 +116,25 @@
 		color: white;
 	}
 
+/* remove dotted border from Firefox */
+button::-moz-focus-inner {
+  border: 0;
+}
+
+
+
 	#hideCoordSelection{
 		float: left;
 		background-color: #4A74AA;
 		display: inline-block;
+		visibility: hidden;
 	}
 
 	#hideDataSelection{
 		float: right;
 		background-color: #4A74AA;
 		display: inline-block;
+		visibility: hidden;
 	}
 
 	.choseFieldDiv{
@@ -125,25 +142,30 @@
 		position: relative;;
 		padding: 0%;
 		padding-bottom: 0px;
-		height: 80px;
-		top: -100px;
 		z-index: 0;
 		text-align: left;
 		background-color: #A4C4E8;
 		width: 100%;
+		-webkit-transform: translateZ(0px);
 		transition: transform 0.3s;
 	}
 
 	#choseFieldDiv1{
+		height: 80px;
+		top: -100px;
 		z-index: 1;
 	}
 
 	#choseFieldDiv2{
 		z-index: 2;
+		height: 40px;
+		top: -170px;
 	}
 
 .single_selection{
 	background-color: #A4C4E8;
+	position: relative;
+	z-index: 1;
 	margin: 0;
 	border: 0;
 	padding: 0;
@@ -153,6 +175,8 @@
 }
 
 	.fieldText{
+		position: relative;
+		z-index: 1;
 		float: left;
 		width: 27%;
 		text-align: right;
@@ -185,20 +209,23 @@
    -webkit-appearance: none;
 	}
 
+
 	.renderButton{
 		background-color: #4A74AA;
+		position: relative;
+		z-index: 1;
 		border: none;
 		padding: 0px;
 		margin: 0px;
 		width: 100%;
 		height: 20px;
-		position: relative;
-		top: -11px;  /* warum 11*/
+		top: -12px;
 		text-align: center;
 		line-height: 12px;
 		font-size: 12px;
 		cursor: pointer;
 		color: white;
+		visibility: hidden;
 	}
 
 	#menuBelowSelection{
@@ -209,12 +236,14 @@
 	#canvas_div{
 		position: relative;
 		margin-top: 10px;
-		visibility: hidden;
+		/*visibility: hidden;*/
+		display: none;
 	}
 
 	#myChart{
 		height: 100%;
 	}
+
 	#snapshot_div{
 		width: calc(100% - 20px);
 		margin-left: 45px;
@@ -464,6 +493,7 @@
 	}
 
 	#legend{
+		margin-top: 20px;
 		text-align: left;
 		position: relative;
 		overflow: hidden;

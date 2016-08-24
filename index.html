@@ -30,34 +30,30 @@
 			<div id="drop_zone2" class="drop_zone">Drop Data JSON</div>
 		</div>
 
-      <div id="hideSelectionHolder">
-        <button type="button" onclick="hideSelection(this.id)" id="hideCoordSelection" class="hideSelectionButton">&#9661;</button>
-        <button type="button" onclick="hideSelection(this.id)" id="hideDataSelection" class="hideSelectionButton">&#9661;</button>
-      </div>
-        <div id="choseFieldDiv1" class="choseFieldDiv">
-          <div id ="choseIDDiv" class="single_selection">
-            <div id="ID-Text1" class="fieldText">Match-ID</div>
-            <select id="coordIDSelect" class="styled-select"></select>
-          </div>
-          <div id="chooseCoordDiv" class="single_selection">
-            <div id="ID-Text2" class="fieldText">Coordinates</div>
-            <select id="coordSelect" class="styled-select"></select>
-            <button type="button" id="renderCoordinatesButton" class="renderButton">Apply</button>
-          </div>
-        </div>
-<!--
-    <div id="choseFieldDiv2" class="choseFieldDiv">
+    <div id="hideSelectionHolder">
+      <button type="button" onclick="showCoordsSelection()" id="hideCoordSelection" class="hideSelectionButton">&#9661;</button>
+      <button type="button" onclick="showDateSelection()" id="hideDataSelection" class="hideSelectionButton">&#9661;</button>
+    </div>
+    <div id="choseFieldDiv1" class="choseFieldDiv">
       <div id ="choseIDDiv" class="single_selection">
-        <div id="ID-Text1" class="fieldText">ID</div>
+        <div id="ID-Text1" class="fieldText">Match-ID</div>
         <select id="coordIDSelect" class="styled-select"></select>
       </div>
       <div id="chooseCoordDiv" class="single_selection">
-        <div id="ID-Text2" class="fieldText">Time</div>
+        <div id="ID-Text2" class="fieldText">Coordinates</div>
         <select id="coordSelect" class="styled-select"></select>
+        <button type="button" id="renderCoordinatesButton" class="renderButton">Apply Coords</button>
       </div>
-
     </div>
--->
+
+    <div id="choseFieldDiv2" class="choseFieldDiv">
+      <div id ="choseIDDiv" class="single_selection">
+        <div id="ID-Text1" class="fieldText">Date</div>
+        <select id="dateSelect" class="styled-select"></select>
+        <button type="button" id="renderDataButton" class="renderButton">Apply Data</button>
+      </div>
+    </div>
+
 
   <div id ="menuBelowSelection">
 		<div id="json_info_div">
