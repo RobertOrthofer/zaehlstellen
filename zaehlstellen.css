@@ -146,9 +146,20 @@ button::-moz-focus-inner {
 		text-align: left;
 		background-color: #A4C4E8;
 		width: 100%;
-		-webkit-transform: translateZ(0px);
 		transition: transform 0.3s;
 	}
+
+	.choseFieldDiv.no-flickr {  /* y u no work <.< */
+		-webkit-backface-visibility: hidden;
+		-moz-backface-visibility:    hidden;
+		-ms-backface-visibility:     hidden;
+		-webkit-transform-style: preserve-3d;
+    -webkit-transform: translateZ(0);
+    -moz-transform: translateZ(0);
+    -ms-transform: translateZ(0);
+    -o-transform: translateZ(0);
+    transform: translateZ(0);
+}
 
 	#choseFieldDiv1{
 		height: 80px;

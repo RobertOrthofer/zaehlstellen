@@ -69,6 +69,7 @@
 //---- Zählstellenpunkte für Karte --------------------------------------------------------------------------->
 function add_zaehlstellen(coords_json)
 {
+	console.log("Apply Coordinates Button pressed")
 	// save the current Selection to global variable selectedOptions, so they can only be changed with the apply button
 	var idField = document.getElementById("coordIDSelect").value.split(","); // array, because it might be nested
 	var coordsField = document.getElementById("coordSelect"). value.split(","); // array, because it might be nested
@@ -97,10 +98,10 @@ function add_zaehlstellen(coords_json)
 		,
 	};
 	map.addLayer(ZaehlstellenPoints);
-	ZaehlstellenPoints.set('name', idField[1]);
+	ZaehlstellenPoints.set('name', idField[idField.length-1]); // name layer after last item in idField-array
 	if (typeof(zaehlstellen_data)!== "undefined"){
 		updateStyle(0);
-		updateInput(0, false, false);
+		if(typeof(selectedOptions.dateField) !== "undefined"){	updateInput(0, false, false); };
 		document.getElementById("sliderDiv").style.display= 'inline-block';
 	}
 
@@ -245,32 +246,43 @@ function add_zaehlstellen(coords_json)
 
 		var reader = new FileReader(); // to read the FileList object
 		reader.onload = function(event){  // Reader ist asynchron, wenn reader mit operation fertig ist, soll das hier (JSON.parse) ausgeführt werden, sonst ist es noch null
-			zaehlstellen_data = JSON.parse(reader.result);  // global, unsauber?
+			zaehlstellen_data = JSON.parse(reader.result);  // global, better method?
 
 			document.getElementById("renderDataButton").style.visibility = "visible";
 			document.getElementById("hideDataSelection").style.visibility = "visible";
 			document.getElementById("hideSelectionHolder").style.visibility = "visible";
 
 			askFields(zaehlstellen_data[0], 2);  // only first feature is needed for property names
-
-			makeDateObjects(zaehlstellen_data);
-			selectedWeekdays = [0,1,2,3,4,5,6]; // select all weekdays before timeslider gets initialized
-			init_timeslider(zaehlstellen_data);
-			find_dataRange(zaehlstellen_data);
-
-			map.getLayers().forEach(function(layer) {
-				if (layer.get('name') == 'zaehlstellen') {
-				  updateStyle(0);
-				  updateInput(0, false, false);
-				  document.getElementById("sliderDiv").style.display= 'inline-block';
-				}
-			});
+			document.getElementById("renderDataButton").addEventListener('click', function(){applyDate();}, false);
 		};
 		reader.readAsText(f);
 
 		// global variable for selection
+		selectedWeekdays = [0,1,2,3,4,5,6]; // select all weekdays before timeslider gets initialized
 		oldSelectedStreetNames = [] // Array for street names, if same amount of points are selected, but different streetnames -> redraw chart completely
 		document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+	}
+
+	function applyDate(){
+		console.log("Apply-Date Button pressed");
+		var dateField = document.getElementById("dateSelect").value.split(",");
+		selectedOptions.dateField = dateField;
+
+		makeDateObjects(zaehlstellen_data);
+		init_timeslider(zaehlstellen_data);
+		find_dataRange(zaehlstellen_data);
+
+		if(typeof(selectedOptions.coordID) !== "undefined"){  // if coordID was selected and applied...
+			map.getLayers().forEach(function(layer) {
+				//if(typeof(layer.get('name')) !== "undefined"){ 
+					if (layer.get('name') == selectedOptions.coordID[selectedOptions.coordID.length-1]) {  // layer is named after last item of coordID-array
+					  updateStyle(0);
+					  if(typeof(selectedOptions.coordID) !== "undefined"){	updateInput(0, false, false); };
+					  document.getElementById("sliderDiv").style.display= 'inline-block';
+					}
+				//};
+			});
+		}
 	}
 
 
@@ -282,8 +294,9 @@ function add_zaehlstellen(coords_json)
 	}
 	//---------- Fill Timeslider with min and max Values ---------->
 	function init_timeslider(data){
-		var minDatum = data[0].datum;
-		var maxDatum = data[data.length-1].datum;
+		console.log("init_timeslider");
+		var minDatum = data[0][selectedOptions.dateField];
+		var maxDatum = data[data.length-1][selectedOptions.dateField];
 		document.getElementById("time_slider").setAttribute("max", data.length-1);
 	}
 	//---------- Button one step left/right ---------->
@@ -295,6 +308,7 @@ function add_zaehlstellen(coords_json)
 	}
 	//---------- Find min and max Data Values for Visualization ---------->
 	function find_dataRange(data){
+		console.log("find_dataRange");
 		min_max_zaehlstelle ={};
 		for (k = 1; k < Object.keys(data[0]).length; k++){  // name of zaehlstelle
 			var name_zaehlstelle = Object.keys(zaehlstellen_data[0])[k];
@@ -312,13 +326,14 @@ function add_zaehlstellen(coords_json)
 	}
 	//--------- Parse Date-Strings into JS Date Objects -------------------->
 	function makeDateObjects(data){
+		console.log("makeDateObjects");
 		for (i = 0; i < data.length; i++){
-			var datestring = data[i].datum
+			var datestring = data[i][selectedOptions.dateField];
 			var thisYear   = parseInt(datestring.substring(0,4));
 			var thisMonth  = parseInt(datestring.substring(5,7));
 			var thisDay   = parseInt(datestring.substring(8,10));
 			var thisDateComplete = new Date(thisYear, thisMonth-1, thisDay);  // JS-Date Month begins at 0
-			zaehlstellen_data[i].datum = thisDateComplete;
+			zaehlstellen_data[i][selectedOptions.dateField] = thisDateComplete;
 		}
 	}
 //-------- Function for Checkboxes of Weekday-Selection (visuals) ------------>
@@ -573,8 +588,6 @@ function snapshot(){
 	var tbl = document.getElementById('snapshot_table') // table reference
     var row = tbl.insertRow(tbl.rows.length)      // append table row
     var eyeButtonCell = row.insertCell(0);
-	//var snapshotNameCell = row.insertCell(1);
-	//var deleteRowButtonCell = row.insertCell(2);
 
 	var buttonText = "Snapshot " + tbl.rows.length;
 	// create button with value of index of array (of this snapshot)
@@ -766,7 +779,6 @@ function askFields(first_feature, option){
 			var coordIDSelection = document.getElementById('coordIDSelect');
 			var coordSelection = document.getElementById('coordSelect');
 			index = 0;
-
 			Object.keys(first_feature).forEach(function(prop) {  // prop = property name
 				//console.log(prop);
 				if(typeof(first_feature[prop]) === "object"){ // if Object is nested, go into next level
@@ -805,10 +817,33 @@ function askFields(first_feature, option){
 
 		case 2: //(= Data-json)
 		{
+			var dateSelection = document.getElementById('dateSelect');
+			index = 0;
+			Object.keys(first_feature).forEach(function(prop) {  // prop = property name
+				//console.log(prop);
+				if(typeof(first_feature[prop]) === "object"){ // if Object is nested, go into next level
+					//console.log(prop + " is an object");
+					Object.keys(first_feature[prop]).forEach(function(prop_nested){
+						//console.log(prop + ": " + prop_nested);
+						var opt = document.createElement("option");
+						opt.value= [prop, prop_nested];
+						opt.innerHTML = prop + ": " + prop_nested; // whatever property it has
+						dateSelection.appendChild(opt);
+						index++;
+					});
+				}
+				else{ // if current Object is not nested...
+					var opt = document.createElement("option");
+					opt.value= [prop];
+					opt.innerHTML = prop; // whatever property it has
+					dateSelection.appendChild(opt);
+					index++;
+				}
+			}); // end of forEach Object.keys
+
 			document.getElementById("hideDataSelection").style.display="inline-block";
 			document.getElementById("hideDataSelection").innerHTML = "△";
-//			document.getElementById('choseFieldDiv1').style.transform = "translateY(90px)";
-		}	// ned of case 2 (=Data-json)
+		}	// end of case 2 (=Data-json)
 		break;
 	}// end of switch
 }
