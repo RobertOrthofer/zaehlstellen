@@ -192,6 +192,7 @@ function add_zaehlstellen(coords_json)
 					coords_json = JSON.parse(reader.result);
 				}
 				document.getElementById("hideCoordSelection").style.visibility = "visible";
+				document.getElementById("choseFieldDiv1").style.visibility = "visible";
 				document.getElementById("renderCoordinatesButton").style.visibility = "visible";
 				document.getElementById("hideSelectionHolder").style.visibility = "visible";
 
@@ -250,6 +251,7 @@ function add_zaehlstellen(coords_json)
 
 			document.getElementById("renderDataButton").style.visibility = "visible";
 			document.getElementById("hideDataSelection").style.visibility = "visible";
+			document.getElementById("choseFieldDiv2").style.visibility = "visible";
 			document.getElementById("hideSelectionHolder").style.visibility = "visible";
 
 			askFields(zaehlstellen_data[0], 2);  // only first feature is needed for property names
@@ -274,7 +276,7 @@ function add_zaehlstellen(coords_json)
 
 		if(typeof(selectedOptions.coordID) !== "undefined"){  // if coordID was selected and applied...
 			map.getLayers().forEach(function(layer) {
-				//if(typeof(layer.get('name')) !== "undefined"){ 
+				//if(typeof(layer.get('name')) !== "undefined"){
 					if (layer.get('name') == selectedOptions.coordID[selectedOptions.coordID.length-1]) {  // layer is named after last item of coordID-array
 					  updateStyle(0);
 					  if(typeof(selectedOptions.coordID) !== "undefined"){	updateInput(0, false, false); };
@@ -858,14 +860,16 @@ function showCoordsSelection(){
 	// calculating direction of div (up or down)
 	if (selectionStatus.coords == false){
 		document.getElementById("hideCoordSelection").innerHTML = "△";
+		document.getElementById("hideCoordSelection").style.backgroundColor ="#4A74AA";
 		document.getElementById('choseFieldDiv1').style.transform = "translateY(100px)";
-		document.getElementById("menuBelowSelection").style.transform = "translateY(0px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(-60px)";
 		selectionStatus.coords = true;
 	}
 	else {
 		document.getElementById("hideCoordSelection").innerHTML = "▽";
-		document.getElementById('choseFieldDiv1').style.transform = "translateY(0px)";
-		document.getElementById("menuBelowSelection").style.transform = "translateY(-100px)";
+		document.getElementById("hideCoordSelection").style.backgroundColor ="#A4C4E8";
+		document.getElementById('choseFieldDiv1').style.transform = "translateY(-5px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(-170px)";
 		selectionStatus.coords = false;
 	}
 }
@@ -881,14 +885,16 @@ function showDateSelection(){
 	// calculating direction of div (up or down)
 	if (selectionStatus.date == false){
 		document.getElementById("hideDataSelection").innerHTML = "△";
+		document.getElementById("hideDataSelection").style.backgroundColor ="#4A74AA";
 		document.getElementById('choseFieldDiv2').style.transform = "translateY(60px)";
-		document.getElementById("menuBelowSelection").style.transform = "translateY(0px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(-100px)";
 		selectionStatus.date = true;
 	}
 	else {
 		document.getElementById("hideDataSelection").innerHTML = "▽";
-		document.getElementById('choseFieldDiv2').style.transform = "translateY(0px)";
-		document.getElementById("menuBelowSelection").style.transform = "translateY(-60px)";
+		document.getElementById("hideDataSelection").style.backgroundColor ="#A4C4E8";
+		document.getElementById('choseFieldDiv2').style.transform = "translateY(-7px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(-170px)";
 		selectionStatus.date = false;
 	}
 }
