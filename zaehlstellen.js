@@ -208,7 +208,7 @@ function add_zaehlstellen(coords_json)
 		var reader = new FileReader(); // to read the FileList object
 		reader.onload = function(event){  // Reader ist asynchron, wenn reader mit operation fertig ist, soll das hier (JSON.parse) ausgeführt werden, sonst ist es noch null
 			if (f.name.substr(f.name.length - 3) ==="csv"){ // check if filetiype is csv
-				coords_json = csvJSON(reader.result);
+				coords_json = csvToGeoJSON(reader.result);
 			}
 			else {
 				coords_json = JSON.parse(reader.result);
@@ -228,8 +228,8 @@ function add_zaehlstellen(coords_json)
 		document.getElementById('list_coords').innerHTML = '<ul style="margin: 0px;">' + output.join('') + '</ul>';
 	}
 
-	// convert .csv to .json
-	function csvJSON(csv){ //csv = reader.result
+	// convert .csv to geoJSON
+	function csvToGeoJSON(csv){ //csv = reader.result
 			var lines=csv.split(/\r?\n/);
 			//var result = [];
 			var headers=lines[0].split(",");
@@ -288,7 +288,12 @@ function add_zaehlstellen(coords_json)
 
 		var reader = new FileReader(); // to read the FileList object
 		reader.onload = function(event){  // Reader ist asynchron, wenn reader mit operation fertig ist, soll das hier (JSON.parse) ausgeführt werden, sonst ist es noch null
-			zaehlstellen_data = JSON.parse(reader.result);  // global, better method?
+			if (f.name.substr(f.name.length - 3) ==="csv"){ // check if filetiype is csv
+				zaehlstellen_data = csvToJSON(reader.result);
+			}
+			else{
+				zaehlstellen_data = JSON.parse(reader.result);  // global, better method?
+			}
 
 			document.getElementById("renderDataButton").style.visibility = "visible";
 			document.getElementById("hideDataSelection").style.visibility = "visible";
@@ -305,6 +310,40 @@ function add_zaehlstellen(coords_json)
 		oldSelectedStreetNames = [] // Array for street names, if same amount of points are selected, but different streetnames -> redraw chart completely
 		document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
 	}
+
+	// convert data (.csv) to JSON
+	function csvToJSON(csv){ //csv = reader.result
+			var lines=csv.split(/\r?\n/);
+			//var result = [];
+			var headers=lines[0].split(",");
+
+			//calculate headers.length and lines.length one time only for performance reasons
+			var linesLength = lines.length;  // = number of zaehlstellen
+			var headerLength = headers.length;  // = number of dates the data is provided
+
+			var splittedLinesArray = [];  // split all the lines in advance, so they dont have to be split for every single value
+			for(var k=1; k<linesLength; k++){
+				var thisLine = lines[k].split(",");
+				splittedLinesArray.push(thisLine);
+			}
+
+			var obj_array = [];
+			var dateName = headers[0]
+
+			for(var i=1;i<headerLength;i++){ // for every date...
+				var json_obj = {};
+				json_obj[dateName] = headers[i];  // headers is dates (top row of csv)
+				for(var j=1; j<linesLength; j++){ // for every zaehlstelle...
+					var currentZaehlstelle = splittedLinesArray[j-1][0]; // takes name of current zaehlstelle (very left column of csv)
+					var currentValue = splittedLinesArray[j-1][i];
+					json_obj[currentZaehlstelle] = parseInt(currentValue);
+				}
+				obj_array.push(json_obj);
+			};
+		return obj_array; //return data-JSON
+	}
+
+
 
 	function applyDate(){
 		console.log("Apply-Date Button pressed");
