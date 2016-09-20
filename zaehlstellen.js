@@ -509,6 +509,10 @@ function change_state(obj){
 			select.getFeatures().item(0).setStyle(null)
 			map.removeInteraction(select);
 		};
+		if (typeof(draw) !== "undefined") {
+			map.removeInteraction(draw);
+			drawingSource.clear();
+		};
 		if(typeof(drawingSource) !== "undefined"){
 			drawingSource.clear();
 		}
