@@ -13,16 +13,17 @@
 	}
 
 	.map {
+		left: 0;
+		top: 0;
 		margin: 0;
 		padding: 0;
 		width: 75%;
 		height: 100%;
 		z-index: -1;
-		float: left;
 	}
 
 	#map{
-		position: relative;
+		position: fixed;
 		z-index: 0;
 	}
 
