@@ -11,6 +11,8 @@
 		date: false
 	};
 
+	var currentFiles = {}; // save filenames of dropped data
+
 
 	//import Chart from './node_modules/chart.js/src/chart.js';
 
@@ -175,36 +177,56 @@ function add_zaehlstellen(coords_json)
 
 		var files = evt.dataTransfer.files; // FileList object.
 
+		if(typeof(currentFiles.Coords) !== "undefined"){
+			var r = confirm("Override existing File?"); // ask User
+			if(r == true){
+				console.log("Override File");
+				// now clear all old options from Coords- and Match-ID-Selection
+				var select = document.getElementById("coordSelect");
+				var select2 = document.getElementById("coordIDSelect");
+				var length = select.options.length; // the 2 selects should have same options
+				for (i = 0; i < length; i++) {
+				  select.options[0] = null;
+				  select2.options[0] = null;
+				}
+			}
+			else{
+				console.log("Do nothing");
+				return;
+			}
+		}
 		// files is a FileList of File objects. List some properties.
 		var output = [];
 		f = files[0];
+
 		output.push('<li><strong>', escape(f.name), '</strong>  - ',
 		f.size, ' bytes, last modified: ',
 		f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a','</li>');
+		currentFiles.Coords = f.name;
 
-			coords_json ={};
-			var reader = new FileReader(); // to read the FileList object
-			reader.onload = function(event){  // Reader ist asynchron, wenn reader mit operation fertig ist, soll das hier (JSON.parse) ausgeführt werden, sonst ist es noch null
-				if (f.name.substr(f.name.length - 3) ==="csv"){ // check if filetiype is csv
-					coords_json = csvJSON(reader.result);
-				}
-				else {
-					coords_json = JSON.parse(reader.result);
-				}
-				document.getElementById("hideCoordSelection").style.visibility = "visible";
-				document.getElementById("choseFieldDiv1").style.visibility = "visible";
-				document.getElementById("renderCoordinatesButton").style.visibility = "visible";
-				document.getElementById("hideSelectionHolder").style.visibility = "visible";
+		coords_json ={};
+		var reader = new FileReader(); // to read the FileList object
+		reader.onload = function(event){  // Reader ist asynchron, wenn reader mit operation fertig ist, soll das hier (JSON.parse) ausgeführt werden, sonst ist es noch null
+			if (f.name.substr(f.name.length - 3) ==="csv"){ // check if filetiype is csv
+				coords_json = csvJSON(reader.result);
+			}
+			else {
+				coords_json = JSON.parse(reader.result);
+			}
+			document.getElementById("hideCoordSelection").style.visibility = "visible";
+			document.getElementById("choseFieldDiv1").style.visibility = "visible";
+			document.getElementById("renderCoordinatesButton").style.visibility = "visible";
+			document.getElementById("hideSelectionHolder").style.visibility = "visible";
 
-				askFields(coords_json.features[0], 1);  // only first feature is needed for property names
-				document.getElementById("renderCoordinatesButton").addEventListener('click', function(){add_zaehlstellen(coords_json);}, false);
-				//console.log('added Event Listener to apply button');
-				//add_zaehlstellen(coords_json);
-			};
-			reader.readAsText(f,"UTF-8");
+			askFields(coords_json.features[0], 1);  // only first feature is needed for property names
+			document.getElementById("renderCoordinatesButton").addEventListener('click', function(){add_zaehlstellen(coords_json);}, false);
+			//console.log('added Event Listener to apply button');
+			//add_zaehlstellen(coords_json);
+		};
+		reader.readAsText(f,"UTF-8");
 
-			document.getElementById('list_coords').innerHTML = '<ul style="margin: 0px;">' + output.join('') + '</ul>';
-		}
+		document.getElementById('list_coords').innerHTML = '<ul style="margin: 0px;">' + output.join('') + '</ul>';
+	}
 
 	// convert .csv to .json
 	function csvJSON(csv){ //csv = reader.result
@@ -238,12 +260,31 @@ function add_zaehlstellen(coords_json)
 
 		var files = evt.dataTransfer.files; // FileList object.
 
+		if(typeof(currentFiles.Data) !== "undefined"){
+			var r = confirm("Override existing File?"); // ask User
+			if(r == true){
+				console.log("Override File");
+				// now clear all old options from Data-Selection
+				var select = document.getElementById("dateSelect");
+				var length = select.options.length;
+				for (i = 0; i < length; i++) {
+				  select.options[0] = null;
+				}
+			}
+			else{
+				console.log("Do nothing");
+				return;
+			}
+		}
+
 		// files is a FileList of File objects. List some properties.
 		var output = [];
 		f = files[0];
 		output.push('<li><strong>', escape(f.name), '</strong>  - ',
 		f.size, ' bytes, last modified: ',
 		f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a','</li>');
+
+		currentFiles.Data = f.name;
 
 		var reader = new FileReader(); // to read the FileList object
 		reader.onload = function(event){  // Reader ist asynchron, wenn reader mit operation fertig ist, soll das hier (JSON.parse) ausgeführt werden, sonst ist es noch null
@@ -540,7 +581,7 @@ function createPolyChart(selectedFeatures){
 			data: {
 				labels: selectedStreetNames,
 				datasets: [{
-					label: 'Traffic Amount',
+					label: 'Value',
 					data: selectedData,
 					backgroundColor: 'rgba(164, 196, 232, 0.7)',
 					borderColor: 'rgba(	74, 116, 170, 0.7)',
@@ -557,6 +598,9 @@ function createPolyChart(selectedFeatures){
 							beginAtZero:true
 						}
 					}]
+				},
+				legend: {
+					display: false
 				}
 			}
 		});
