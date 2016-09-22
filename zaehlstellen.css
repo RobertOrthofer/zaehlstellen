@@ -74,6 +74,7 @@
 	#sliderOnly{
 		width: calc(100% - 58px);
 		display: inline-block;
+		padding-top: 5px;
 	}
 
 	#drop_zone_holder{
@@ -207,23 +208,37 @@ button::-moz-focus-inner {
 		margin-top: 5px;
 		border: 0px;
 		padding: 0px;
-	  width: 60%;
+	  	width: 60%;
 		height: 30px;
-	  overflow: hidden;
+	  	overflow: hidden;
 		margin-right: 10%;
-	  background: #f0f6fb;
+	  	background: #f0f6fb;
 	}
 
 	.styled-select select {
-   background: transparent;
-	 margin-right: 50px;
-   width: 100%;
-   padding: 0px;
-   font-size: 12px;
-   line-height: 1;
-   border: 0;
-   border-radius: 0;
-   -webkit-appearance: none;
+	   background: transparent;
+	margin-right: 50px;
+	   width: 100%;
+	   padding: 0px;
+	   font-size: 12px;
+	   line-height: 1;
+	   border: 0;
+	   border-radius: 0;
+	   -webkit-appearance: none;
+	}
+
+	#epsgInput{
+		float: left;
+		margin: 0px;
+		margin-top: 5px;
+		border: 0px;
+		padding: 0px;
+		padding-left: 5px;
+		width: 30%;
+		height: 30px;
+		overflow: hidden;
+		margin-right: 10%;
+		background: #f0f6fb;
 	}
 
 
@@ -231,7 +246,7 @@ button::-moz-focus-inner {
 		background-color: #4A74AA;
 		position: relative;
 		z-index: 1;
-		margin-top: 2px;
+		margin-top: 0px;
 		border: none;
 		border-top: 1px dashed;
 		border-color: white;
@@ -269,7 +284,7 @@ button::-moz-focus-inner {
 		overflow: auto;
 	}
 	#playbutton_div{
-		height: 40px;
+		height: 30px;
 	}
 
 	#weekday_div {

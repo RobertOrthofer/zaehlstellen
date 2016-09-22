@@ -948,15 +948,15 @@ function showCoordsSelection(){
 	if (selectionStatus.coords == false){
 		document.getElementById("hideCoordSelection").innerHTML = "△";
 		document.getElementById("hideCoordSelection").style.backgroundColor ="#4A74AA";
-		document.getElementById('choseFieldDiv1').style.transform = "translateY(100px)";
+		document.getElementById('choseFieldDiv1').style.transform = "translateY(102px)";
 		document.getElementById("menuBelowSelection").style.transform = "translateY(-60px)";
 		selectionStatus.coords = true;
 	}
 	else {
 		document.getElementById("hideCoordSelection").innerHTML = "▽";
 		document.getElementById("hideCoordSelection").style.backgroundColor ="#A4C4E8";
-		document.getElementById('choseFieldDiv1').style.transform = "translateY(-5px)";
-		document.getElementById("menuBelowSelection").style.transform = "translateY(-170px)";
+		document.getElementById('choseFieldDiv1').style.transform = "translateY(-45px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(-210px)";
 		selectionStatus.coords = false;
 	}
 }
@@ -973,15 +973,15 @@ function showDateSelection(){
 	if (selectionStatus.date == false){
 		document.getElementById("hideDataSelection").innerHTML = "△";
 		document.getElementById("hideDataSelection").style.backgroundColor ="#4A74AA";
-		document.getElementById('choseFieldDiv2').style.transform = "translateY(60px)";
-		document.getElementById("menuBelowSelection").style.transform = "translateY(-100px)";
+		document.getElementById('choseFieldDiv2').style.transform = "translateY(23px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(-140px)";
 		selectionStatus.date = true;
 	}
 	else {
 		document.getElementById("hideDataSelection").innerHTML = "▽";
 		document.getElementById("hideDataSelection").style.backgroundColor ="#A4C4E8";
-		document.getElementById('choseFieldDiv2').style.transform = "translateY(-7px)";
-		document.getElementById("menuBelowSelection").style.transform = "translateY(-170px)";
+		document.getElementById('choseFieldDiv2').style.transform = "translateY(-45px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(-205px)";
 		selectionStatus.date = false;
 	}
 }
