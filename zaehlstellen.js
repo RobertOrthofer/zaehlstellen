@@ -74,9 +74,41 @@ function add_zaehlstellen(coords_json)
 	console.log("Apply Coordinates Button pressed")
 	// save the current Selection to global variable selectedOptions, so they can only be changed with the apply button
 	var idField = document.getElementById("coordIDSelect").value.split(","); // array, because it might be nested
-	var coordsField = document.getElementById("coordSelect"). value.split(","); // array, because it might be nested
+	var coordsField = document.getElementById("coordSelect").value.split(","); // array, because it might be nested
+	var epsgField = document.getElementById("epsgInput").value;
 	selectedOptions.coordID = idField;
 	selectedOptions.coordField = coordsField;
+	selectedOptions.epsg = epsgField;
+
+	// If EPSG is not empty or 4326, the data has to be reprojected. get the new coordinates directly from epsg.io api
+	if(epsgField !=="4326" && epsgField !== "")
+	{
+		var xhrCoordinateString = "";
+		for (var i = 0; i < coords_json.features.length; i++) {
+			var x_coord = coords_json.features[i].geometry.coordinates[0];
+			var y_coord = coords_json.features[i].geometry.coordinates[1];
+			var xhrCoordinateString = xhrCoordinateString + x_coord + "," + y_coord + ";";
+			//console.log(xhrCoordinateString);
+		}
+		xhrCoordinateString = xhrCoordinateString.slice(0, -1);  // take away last ";"
+
+		var xhrString = "http://epsg.io/trans?data=" + xhrCoordinateString + "&s_srs=" + epsgField + "&t_srs=4326";  //testing coordinates are in 31259
+		console.log(xhrString);
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+		  if (this.readyState == 4 && this.status == 200) { // when transformation is complete, insert the new coordinates
+		    //console.log("Server response:");
+			//console.log(xhttp.response);
+			var responseArray = JSON.parse(xhttp.response);
+			for (var i = 0; i < responseArray.length; i++) { // the keys of the original points and the transformed points should be equal
+				coords_json.features[i].geometry.coordinates[0] = Number(responseArray[i].x);
+				coords_json.features[i].geometry.coordinates[1] = Number(responseArray[i].y);
+			}
+		  }
+		};
+		xhttp.open("GET", xhrString, false); // not asynch, need coordinates before points are displayed on map
+		xhttp.send();
+	}
 
 	ZaehlstellenPoints = new ol.layer.Vector({
 		source: new ol.source.Vector({
