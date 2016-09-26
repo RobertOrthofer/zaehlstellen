@@ -20,7 +20,7 @@
 	function initMap() {
 		map = new ol.Map({target: "map"});
 
-		viewpoint = new ol.View({ center: ol.proj.fromLonLat([14.82719, 47.21595]), zoom: 9 });
+		viewpoint = new ol.View({ center: ol.proj.fromLonLat([13.4, 47.4633]), zoom: 8 });
 		map.setView(viewpoint);
 
 		//-------------------  Basemap  -------------------------------
@@ -137,15 +137,19 @@ function add_zaehlstellen(coords_json)
 	};
 	map.addLayer(ZaehlstellenPoints);
 
-	// bounce by zooming out and back in
-    var bounce = ol.animation.bounce({
-      resolution: map.getView().getResolution() * 1.2 // works with non-integer
-    });
+	var zoom = ol.animation.zoom({
+		resolution: map.getView().getResolution(),
+		duration: 500,
+		easing: ol.easing.inAndOut
+	});
     // start the pan at the current center of the map
     var pan = ol.animation.pan({
-      source: map.getView().getCenter()
+	    source: map.getView().getCenter(),
+		duration: 500,
+		easing: ol.easing.inAndOut
     });
-    map.beforeRender(bounce);
+    //map.beforeRender(bounce);
+	map.beforeRender(zoom);
     map.beforeRender(pan);
     // when we set the center to the new location, the animated move will
     // trigger the bounce and pan effects
@@ -158,6 +162,7 @@ function add_zaehlstellen(coords_json)
 		if(typeof(selectedOptions.dateField) !== "undefined"){	updateInput(0, false, false); };
 		document.getElementById("sliderDiv").style.display= 'inline-block';
 	}
+	addPopups() // add eventhandler for clicks to show popups
 }
 
 
@@ -1046,31 +1051,36 @@ function showDateSelection(){
 	}
 }
 
+//===============================================================================================================
+// Create a popup overlay which will be used to display feature info
+function addPopups(){
+	/*
+	var popup = new ol.Overlay.Popup();
+	map.addOverlay(popup);
 
+	// Add an event handler for the map "singleclick" event
+	map.on('singleclick', function(evt) {
+	    // Hide existing popup and reset it's offset
+	    popup.hide();
+	    popup.setOffset([0, 0]);
 
-/*
-	// if other selection is open, close it
-	if (selectionStatus.coords == true){ showDateSelection(); };
+	    // Attempt to find a feature in one of the visible vector layers
+	    var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+	        return feature;
+	    });
 
-	console.log("hide/show Selection: " + ID);
-	var otherID ="";
-	if (ID ==="hideCoordSelection") {otherID ="hideDataSelection"}
-	else {otherID = "hideCoordSelection"}
+	    if (feature) {
+	        var coord = feature.getGeometry().getCoordinates();
+	        var props = feature.getProperties();
+	        var info = "<h2><a href='" + props.caseurl + "'>" + props.casereference + "</a></h2>";
+	            info += "<p>" + props.locationtext + "</p>";
+	            info += "<p>Status: " + props.status + " " + props.statusdesc + "</p>";
+	        // Offset the popup so it points at the middle of the marker not the tip
+	        popup.setOffset([0, -22]);
+	        popup.show(coord, info);
 
-	//var dropZoneHeight = document.getElementById("drop_zone_holder").offsetHeight + document.getElementById("showCoordsSelectionHolder");
+	    }
 
-	// if selection-Div is hidden, show it, and hide the other div
-	if(document.getElementById(ID).innerHTML == "▽"){
-		document.getElementById(ID).innerHTML = "△";
-		document.getElementById('choseFieldDiv1').style.transform = "translateY(100px)";
-		document.getElementById("menuBelowSelection").style.transform = "translateY(0px)";
-	}
-
-	// if selection-Div is shown, hide it
-	else{
-		document.getElementById(ID).innerHTML = "▽";
-		document.getElementById('choseFieldDiv1').style.transform = "translateY(0px)";
-		document.getElementById("menuBelowSelection").style.transform = "translateY(-100px)";
-	}
+	});
+	*/
 }
-*/
