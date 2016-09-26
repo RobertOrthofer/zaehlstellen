@@ -132,13 +132,28 @@ function add_zaehlstellen(coords_json)
 		,
 	};
 	map.addLayer(ZaehlstellenPoints);
+
+	// bounce by zooming out and back in
+    var bounce = ol.animation.bounce({
+      resolution: map.getView().getResolution() * 1.2 // works with non-integer
+    });
+    // start the pan at the current center of the map
+    var pan = ol.animation.pan({
+      source: map.getView().getCenter()
+    });
+    map.beforeRender(bounce);
+    map.beforeRender(pan);
+    // when we set the center to the new location, the animated move will
+    // trigger the bounce and pan effects
+	var extent = ZaehlstellenPoints.getSource().getExtent();  // zoom to all features
+	map.getView().fit(extent, map.getSize());
+
 	ZaehlstellenPoints.set('name', idField[idField.length-1]); // name layer after last item in idField-array
 	if (typeof(zaehlstellen_data)!== "undefined"){
 		updateStyle(0);
 		if(typeof(selectedOptions.dateField) !== "undefined"){	updateInput(0, false, false); };
 		document.getElementById("sliderDiv").style.display= 'inline-block';
 	}
-
 }
 
 
