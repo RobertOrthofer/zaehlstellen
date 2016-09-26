@@ -72,6 +72,10 @@
 function add_zaehlstellen(coords_json)
 {
 	console.log("Apply Coordinates Button pressed")
+
+	//remove current coordinates, if existing
+
+
 	// save the current Selection to global variable selectedOptions, so they can only be changed with the apply button
 	var idField = document.getElementById("coordIDSelect").value.split(","); // array, because it might be nested
 	var coordsField = document.getElementById("coordSelect").value.split(","); // array, because it might be nested
@@ -906,7 +910,16 @@ function askFields(first_feature, option){
 	// @option:
 	//		1: Coordinates
 	// 		2: Data
-	option == 1 ? showCoordsSelection() : showDateSelection();
+	if(option == 1){ // if Coordinates, then show/hide Coordinates, else Data selection
+		if (selectionStatus.coords == false){ // only show/hide when not already shown, happens when re-dragging data into drop-field
+			showCoordsSelection();
+		}
+  	}
+	else{
+		if (selectionStatus.date == false){
+	  		showDateSelection();
+		}
+	}
 
 	switch(option)
 	{
