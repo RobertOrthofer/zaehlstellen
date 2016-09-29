@@ -84,41 +84,40 @@ function add_zaehlstellen(coords_json)
 	selectedOptions.coordField = coordsField;
 	selectedOptions.epsg = epsgField;
 
-	// If EPSG is not empty or 4326, the data has to be reprojected. get the new coordinates directly from epsg.io api
+	// If EPSG is not empty or 4326, the data has to be reprojected. get the .wkt from epsg.io api
+	var responseString = "";
 	if(epsgField !=="4326" && epsgField !== "")
 	{
-		var xhrCoordinateString = "";
-		for (var i = 0; i < coords_json.features.length; i++) {
-			var x_coord = coords_json.features[i].geometry.coordinates[0];
-			var y_coord = coords_json.features[i].geometry.coordinates[1];
-			var xhrCoordinateString = xhrCoordinateString + x_coord + "," + y_coord + ";";
-			//console.log(xhrCoordinateString);
-		}
-		xhrCoordinateString = xhrCoordinateString.slice(0, -1);  // take away last ";"
-
-		var xhrString = "http://epsg.io/trans?data=" + xhrCoordinateString + "&s_srs=" + epsgField + "&t_srs=4326";  //testing coordinates are in 31259
-		console.log(xhrString);
+		var xhrString = "http://epsg.io/" + epsgField + ".js";
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function() {
 		  if (this.readyState == 4 && this.status == 200) { // when transformation is complete, insert the new coordinates
-		    //console.log("Server response:");
-			//console.log(xhttp.response);
-			var responseArray = JSON.parse(xhttp.response);
-			for (var i = 0; i < responseArray.length; i++) { // the keys of the original points and the transformed points should be equal
-				coords_json.features[i].geometry.coordinates[0] = Number(responseArray[i].x);
-				coords_json.features[i].geometry.coordinates[1] = Number(responseArray[i].y);
+			var responseString = xhttp.response;  // looks like:   "proj4.defs("EPSG:3256","+proj=lcc +lat_1=-72.66666666666667 +lat_2=-75.33333333333333 +lat_0=-90 +lon_0=117 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs");"
+			console.log(responseString);
+			if(responseString === ""){
+				alert("The chosen coordinate system is unknown. Please check your input.");
+			}
+			else{
+				console.log("EPSG found")
+				eval(responseString); // execute the function, so projection is defined in proj4
 			}
 		  }
 		};
 		xhttp.open("GET", xhrString, false); // not asynch, need coordinates before points are displayed on map
 		xhttp.send();
 	}
+	//eval(responseString);
 
 	ZaehlstellenPoints = new ol.layer.Vector({
 		source: new ol.source.Vector({
-			features: (new ol.format.GeoJSON()).readFeatures(coords_json, { featureProjection: 'EPSG:3857' })
-			//url: coords_json,
-			//format: new ol.format.GeoJSON()
+			features: (new ol.format.GeoJSON()).readFeatures(coords_json, {
+				//dataProjection: proj4('EPSG:' + epsgField),  //e.g.: proj4('EPSG:32633');
+				 dataProjection: ol.proj.get('EPSG:' + epsgField),  //e.g.: proj4('EPSG:32633');
+				//dataProjection: ol.proj.ProjectionLike('EPSG:' + epsgField),  //e.g.: proj4('EPSG:32633');
+				//dataProjection: 'EPSG:32633',
+				//dataProjection: 'EPSG:' + epsgField,
+				featureProjection: 'EPSG:3857'
+			})
 		}),
 		style: function(feature, resolution){
 			var geom = feature.getGeometry().getType();
@@ -286,7 +285,8 @@ function add_zaehlstellen(coords_json)
 
 	// convert .csv to geoJSON
 	function csvToGeoJSON(csv){ //csv = reader.result
-			var lines=csv.split(/\r?\n/);
+			var lines=csv.split(/\r|\n/);
+			//line = lines.split("");
 			//var result = [];
 			var headers=lines[0].split(",");
 
@@ -298,7 +298,8 @@ function add_zaehlstellen(coords_json)
 					json_obj["geometry"] = {
 							"type" : "Point",
 							"coordinates" : [currentline[1], currentline[2]]};
-					json_obj["properties"] = {"zaehlstelle" : currentline[0]}; // not variable yet, in progress
+					json_obj["properties"] = {};
+					json_obj["properties"][headers[0]] = currentline[0]; // get the name of zaehlstellen variable
 					obj_array.push(json_obj);
 			};
 
@@ -1053,34 +1054,6 @@ function showDateSelection(){
 
 //===============================================================================================================
 // Create a popup overlay which will be used to display feature info
-function addPopups(){
-	/*
-	var popup = new ol.Overlay.Popup();
-	map.addOverlay(popup);
+function addPopups(){  // work in progress
 
-	// Add an event handler for the map "singleclick" event
-	map.on('singleclick', function(evt) {
-	    // Hide existing popup and reset it's offset
-	    popup.hide();
-	    popup.setOffset([0, 0]);
-
-	    // Attempt to find a feature in one of the visible vector layers
-	    var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-	        return feature;
-	    });
-
-	    if (feature) {
-	        var coord = feature.getGeometry().getCoordinates();
-	        var props = feature.getProperties();
-	        var info = "<h2><a href='" + props.caseurl + "'>" + props.casereference + "</a></h2>";
-	            info += "<p>" + props.locationtext + "</p>";
-	            info += "<p>Status: " + props.status + " " + props.statusdesc + "</p>";
-	        // Offset the popup so it points at the middle of the marker not the tip
-	        popup.setOffset([0, -22]);
-	        popup.show(coord, info);
-
-	    }
-
-	});
-	*/
 }
