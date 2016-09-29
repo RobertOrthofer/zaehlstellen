@@ -12,6 +12,7 @@
   <link rel="stylesheet" type="text/css" href="zaehlstellen.css" />
   <script type="text/javascript" src="Chart/Chart.js"></script>   <!--via npm -->
   <script src="zaehlstellen.js"></script>
+  <script src="proj4js_old/proj4.js"></script>
 
  </head>
 
@@ -42,6 +43,10 @@
       <div id="chooseCoordDiv" class="single_selection">
         <div id="ID-Text2" class="fieldText">Coordinates</div>
         <select id="coordSelect" class="styled-select"></select>
+      </div>
+      <div id="chooseCoordDiv" class="single_selection">
+        <div id="ID-Text3" class="fieldText">EPSG</div>
+        <input id="epsgInput" type="text" name="epsg" placeholder="4326">
       </div>
       <button type="button" id="renderCoordinatesButton" class="renderButton">Apply Coords</button>
     </div>
