@@ -85,7 +85,7 @@ function add_zaehlstellen(coords_json)
 
 	// if coordinates are csv, make an aproppriate JSON with selected x and y coordinates and Match-ID as property
 	if(currentFiles.CoordsFileType === "csv"){
-		coords_json = csvToGeoJSON(window.csv);
+		coords_json = csvToGeoJSON(); // only needs window.csv, global deleted later
 	}
 
 	// If EPSG is not empty or 4326, the data has to be reprojected. get the .wkt from epsg.io api
@@ -190,7 +190,8 @@ function add_zaehlstellen(coords_json)
 
 		ZaehlstellenPoints.setStyle(function(feature, resolution){
 			var geom = feature.getGeometry().getType();  // geom = point
-			var zaehlstelle = feature.get(selectedOptions.coordID[1]);  // electedOptions.coordID[1] = z.B. b0251
+			var zaehlstelle = feature.get(selectedOptions.coordID);  // selectedOptions.coordID = e.g. "zaehlstelle", zaehlstelle = e.g.:"b30657"
+			console.log(zaehlstelle);
 			var amount = zaehlstellen_data[y][zaehlstelle]; // amount = z.B. 1055
 			//example: min_max_zaehlstelle["b02501"][1] = maximum of b02501 of all days
 
@@ -300,13 +301,14 @@ function add_zaehlstellen(coords_json)
 	}
 
 	function getColumnNames(csv){
-		var lines=csv.split(/\r|\n/);
+		var lines=csv.split(/[\r\n]+/);
 		return lines[0].split(","); //returns array with column names
 	}
 
 	// convert .csv to geoJSON
-	function csvToGeoJSON(csv){ //csv = reader.result
+	function csvToGeoJSON(){ //csv = reader.result
 			var lines=csv.split(/[\r\n]+/); // split for windows and mac csv (newline or carriage return)
+			delete window.csv; // reader.result from drag&drop not needed anymore
 			var headers=lines[0].split(",");  //not needed?
 			var matchID = document.getElementById("coordIDSelect").value;
 			var xColumn = document.getElementById("xSelect").value;
@@ -397,7 +399,7 @@ function add_zaehlstellen(coords_json)
 
 	// convert data (.csv) to JSON
 	function csvToJSON(csv){ //csv = reader.result
-			var lines=csv.split(/\r?\n/);
+			var lines=csv.split(/[\r\n]+/);
 			//var result = [];
 			var headers=lines[0].split(",");
 
@@ -408,16 +410,22 @@ function add_zaehlstellen(coords_json)
 			var splittedLinesArray = [];  // split all the lines in advance, so they dont have to be split for every single value
 			for(var k=1; k<linesLength; k++){
 				var thisLine = lines[k].split(",");
+
+				if(thisLine == ""){ // if-clause, because csv could have empty lines at the end
+					break;
+				}
+
 				splittedLinesArray.push(thisLine);
 			}
 
 			var obj_array = [];
-			var dateName = headers[0]
+			var dateName = headers[0];
 
-			for(var i=1;i<headerLength;i++){ // for every date...
+			for(var i=1;i<headerLength;i++){ // for every date, last one is empty (because csv has )
 				var json_obj = {};
 				json_obj[dateName] = headers[i];  // headers is dates (top row of csv)
-				for(var j=1; j<linesLength; j++){ // for every zaehlstelle...
+				for(var j=1; j<splittedLinesArray.length; j++){ // for every zaehlstelle...
+					//console.log("j:  " + j);
 					var currentZaehlstelle = splittedLinesArray[j-1][0]; // takes name of current zaehlstelle (very left column of csv)
 					var currentValue = splittedLinesArray[j-1][i];
 					json_obj[currentZaehlstelle] = parseInt(currentValue);
