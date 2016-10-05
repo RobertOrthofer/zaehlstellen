@@ -199,6 +199,7 @@ button::-moz-focus-inner {
 		width: 27%;
 		text-align: right;
 		padding-right: 3%;
+		padding-left: 7%;
 		font-size: 12px;
 	}
 
@@ -208,10 +209,10 @@ button::-moz-focus-inner {
 		margin-top: 5px;
 		border: 0px;
 		padding: 0px;
-	  	width: 60%;
+	  	width: 55%;
 		height: 30px;
 	  	overflow: hidden;
-		margin-right: 10%;
+		margin-right: 5%;
 	  	background: #f0f6fb;
 	}
 
@@ -228,16 +229,16 @@ button::-moz-focus-inner {
 	}
 
 	#epsgInput{
-		float: left;
+		float: right;
 		margin: 0px;
 		margin-top: 5px;
 		border: 0px;
 		padding: 0px;
 		padding-left: 5px;
-		width: 30%;
+		width: 25%;
 		height: 30px;
 		overflow: hidden;
-		margin-right: 10%;
+		margin-right: calc(35% - 5px);
 		background: #f0f6fb;
 	}
 

@@ -35,15 +35,23 @@
       <button type="button" onclick="showCoordsSelection()" id="hideCoordSelection" class="hideSelectionButton">&#9661;</button>
       <button type="button" onclick="showDateSelection()" id="hideDataSelection" class="hideSelectionButton">&#9661;</button>
     </div>
+
     <div id="choseFieldDiv1" class="choseFieldDiv no-flickr">
       <div id ="choseIDDiv" class="single_selection">
         <div id="ID-Text1" class="fieldText">Match-ID</div>
         <select id="coordIDSelect" class="styled-select"></select>
       </div>
+
       <div id="chooseCoordDiv" class="single_selection">
-        <div id="ID-Text2" class="fieldText">Coordinates</div>
-        <select id="coordSelect" class="styled-select"></select>
+        <div id="ID-Text2" class="fieldText">X-Coordinate</div>
+        <select id="xSelect" class="styled-select"></select>
       </div>
+
+      <div id="chooseCoordDiv" class="single_selection">
+        <div id="ID-Text3" class="fieldText">Y-Coordinate</div>
+        <select id="ySelect" class="styled-select"></select>
+      </div>
+
       <div id="chooseCoordDiv" class="single_selection">
         <div id="ID-Text3" class="fieldText">EPSG</div>
         <input id="epsgInput" type="text" name="epsg" placeholder="4326">

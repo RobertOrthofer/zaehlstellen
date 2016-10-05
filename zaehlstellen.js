@@ -75,14 +75,18 @@ function add_zaehlstellen(coords_json)
 
 	//remove current coordinates, if existing
 
-
 	// save the current Selection to global variable selectedOptions, so they can only be changed with the apply button
 	var idField = document.getElementById("coordIDSelect").value.split(","); // array, because it might be nested
-	var coordsField = document.getElementById("coordSelect").value.split(","); // array, because it might be nested
+	var coordsField = document.getElementById("xSelect").value.split(","); // array, because it might be nested
 	var epsgField = document.getElementById("epsgInput").value;
 	selectedOptions.coordID = idField;
 	selectedOptions.coordField = coordsField;
 	selectedOptions.epsg = epsgField;
+
+	// if coordinates are csv, make an aproppriate JSON with selected x and y coordinates and Match-ID as property
+	if(currentFiles.CoordsFileType === "csv"){
+		coords_json = csvToGeoJSON(window.csv);
+	}
 
 	// If EPSG is not empty or 4326, the data has to be reprojected. get the .wkt from epsg.io api
 	var responseString = "";
@@ -107,10 +111,10 @@ function add_zaehlstellen(coords_json)
 		xhttp.send();
 	}
 	//eval(responseString);
-
+	console.log(ol.proj.get('EPSG:' + epsgField));
 	ZaehlstellenPoints = new ol.layer.Vector({
 		source: new ol.source.Vector({
-			features: (new ol.format.GeoJSON()).readFeatures(coords_json, {
+			features: (new ol.format.GeoJSON({ defaultDataProjection: 'EPSG:4326'})).readFeatures(coords_json, {
 				//dataProjection: proj4('EPSG:' + epsgField),  //e.g.: proj4('EPSG:32633');
 				 dataProjection: ol.proj.get('EPSG:' + epsgField),  //e.g.: proj4('EPSG:32633');
 				//dataProjection: ol.proj.ProjectionLike('EPSG:' + epsgField),  //e.g.: proj4('EPSG:32633');
@@ -161,7 +165,7 @@ function add_zaehlstellen(coords_json)
 		if(typeof(selectedOptions.dateField) !== "undefined"){	updateInput(0, false, false); };
 		document.getElementById("sliderDiv").style.display= 'inline-block';
 	}
-	addPopups() // add eventhandler for clicks to show popups
+//	addPopups() // add eventhandler for clicks to show popups
 }
 
 
@@ -237,12 +241,14 @@ function add_zaehlstellen(coords_json)
 			if(r == true){
 				console.log("Override File");
 				// now clear all old options from Coords- and Match-ID-Selection
-				var select = document.getElementById("coordSelect");
+				var select = document.getElementById("xSelect");
 				var select2 = document.getElementById("coordIDSelect");
+				var select3 = document.getElementById("ySelect");
 				var length = select.options.length; // the 2 selects should have same options
 				for (i = 0; i < length; i++) {
 				  select.options[0] = null;
 				  select2.options[0] = null;
+				  select3.options[0] = null;
 				}
 			}
 			else{
@@ -262,18 +268,28 @@ function add_zaehlstellen(coords_json)
 		coords_json ={};
 		var reader = new FileReader(); // to read the FileList object
 		reader.onload = function(event){  // Reader ist asynchron, wenn reader mit operation fertig ist, soll das hier (JSON.parse) ausgeführt werden, sonst ist es noch null
+			var columnNames = [];
 			if (f.name.substr(f.name.length - 3) ==="csv"){ // check if filetiype is csv
-				coords_json = csvToGeoJSON(reader.result);
+				currentFiles.CoordsFileType = "csv";
+				columnNames = getColumnNames(reader.result);
+				window.csv = reader.result;  // temporary save reader.result into global variable, until geoJSON can be created with user-inputs
+				askFields2(columnNames, 1);
+			}
+			else if (f.name.substr(f.name.length - 4) ==="json"){
+				currentFiles.CoordsFileType = "JSON";
+				coords_json = JSON.parse(reader.result);
+				askFields2(columnNames, 1);
 			}
 			else {
-				coords_json = JSON.parse(reader.result);
+				alert("Unrecognized Filetype. Please Check your input (only .csv or .json allowed)");
 			}
+
 			document.getElementById("hideCoordSelection").style.visibility = "visible";
 			document.getElementById("choseFieldDiv1").style.visibility = "visible";
 			document.getElementById("renderCoordinatesButton").style.visibility = "visible";
 			document.getElementById("hideSelectionHolder").style.visibility = "visible";
 
-			askFields(coords_json.features[0], 1);  // only first feature is needed for property names
+			//askFields(coords_json.features[0], 1);  // only first feature is needed for property names
 			document.getElementById("renderCoordinatesButton").addEventListener('click', function(){add_zaehlstellen(coords_json);}, false);
 			//console.log('added Event Listener to apply button');
 			//add_zaehlstellen(coords_json);
@@ -283,12 +299,23 @@ function add_zaehlstellen(coords_json)
 		document.getElementById('list_coords').innerHTML = '<ul style="margin: 0px;">' + output.join('') + '</ul>';
 	}
 
+	function getColumnNames(csv){
+		var lines=csv.split(/\r|\n/);
+		return lines[0].split(","); //returns array with column names
+	}
+
 	// convert .csv to geoJSON
 	function csvToGeoJSON(csv){ //csv = reader.result
-			var lines=csv.split(/\r|\n/);
-			//line = lines.split("");
-			//var result = [];
-			var headers=lines[0].split(",");
+			var lines=csv.split(/[\r\n]+/); // split for windows and mac csv (newline or carriage return)
+			var headers=lines[0].split(",");  //not needed?
+			var matchID = document.getElementById("coordIDSelect").value;
+			var xColumn = document.getElementById("xSelect").value;
+			var yColumn = document.getElementById("ySelect").value;
+
+			// get the positions of the seleted columns in the header
+			var positionMatchID = headers.indexOf(matchID);
+			var positionX = headers.indexOf(xColumn);
+			var positionY = headers.indexOf(yColumn);
 
 			var obj_array = []
 			for(var i=1;i<lines.length;i++){
@@ -297,9 +324,9 @@ function add_zaehlstellen(coords_json)
 				//for(var j=0;j<headers.length;j++){
 					json_obj["geometry"] = {
 							"type" : "Point",
-							"coordinates" : [currentline[1], currentline[2]]};
+							"coordinates" : [currentline[positionX], currentline[positionY]]};
 					json_obj["properties"] = {};
-					json_obj["properties"][headers[0]] = currentline[0]; // get the name of zaehlstellen variable
+					json_obj["properties"][matchID] = currentline[positionMatchID]; // get the name of zaehlstellen variable
 					obj_array.push(json_obj);
 			};
 
@@ -357,7 +384,7 @@ function add_zaehlstellen(coords_json)
 			document.getElementById("choseFieldDiv2").style.visibility = "visible";
 			document.getElementById("hideSelectionHolder").style.visibility = "visible";
 
-			askFields(zaehlstellen_data[0], 2);  // only first feature is needed for property names
+			askFields2(zaehlstellen_data[0], 2);  // only first feature is needed for property names
 			document.getElementById("renderDataButton").addEventListener('click', function(){applyDate();}, false);
 		};
 		reader.readAsText(f);
@@ -912,11 +939,106 @@ function autoPlay(){
 };
 
 //----------Populating Selections for ID and Coordinates after Drag&Drop--------------------------------------------------
-function askFields(first_feature, option){
+function askFields2(columnNames, option){
+	// @columnNames: Array with column Names as Strings
 	// @option:
 	//		1: Coordinates
 	// 		2: Data
+
+
 	if(option == 1){ // if Coordinates, then show/hide Coordinates, else Data selection
+		if (selectionStatus.coords == false){ // only show/hide when not already shown, happens when re-dragging data into drop-field
+			showCoordsSelection();
+		}
+	}
+	else{
+		if (selectionStatus.date == false){
+			showDateSelection();
+		}
+	}
+
+	switch(option)
+	{
+		case 1:  // = coordinates
+		{
+			if(currentFiles.CoordsFileType === "csv"){
+				var coordIDSelection = document.getElementById('coordIDSelect');
+				var coordXSelection = document.getElementById('xSelect');
+				var coordYSelection = document.getElementById('ySelect');
+
+				// clear all existing options
+				coordIDSelection.options.length = 0;
+				coordXSelection.options.length = 0;
+				coordYSelection.options.length = 0;
+
+				coordXSelection.disabled=false;  // enable x- and y-coordinate Selection, if it got deselected before
+				coordYSelection.disabled=false;
+
+				var headerLength = columnNames.length;
+				for (i=0; i < headerLength; i++){
+					var opt = document.createElement("option");
+					opt.value= columnNames[i];
+					opt.innerHTML = columnNames[i];
+					coordIDSelection.appendChild(opt);
+					var opt2 = opt.cloneNode(true); // clone Options for other Selection
+					coordXSelection.appendChild(opt2);
+					var opt3 = opt.cloneNode(true); // clone Options for other Selection
+					coordYSelection.appendChild(opt3);
+				}
+			}
+			else if (currentFiles.CoordsFileType === "JSON"){
+
+				var propertyNames = Object.getOwnPropertyNames(coords_json.features[0].properties) // array of properties of GeoJSON
+				var coordIDSelection = document.getElementById('coordIDSelect');
+
+				// clear all existing options
+				coordIDSelection.options.length = 0;
+
+				var propertyNamesLength = propertyNames.length;
+				for (i=0; i < propertyNamesLength; i++){
+					var opt = document.createElement("option");
+					opt.value= propertyNames[i];
+					opt.innerHTML = propertyNames[i];
+					coordIDSelection.appendChild(opt);
+				}
+				document.getElementById("xSelect").disabled=true;  // disable x- and y-coordinate Selection, because geometry-property is standardized
+				document.getElementById("ySelect").disabled=true;
+			}
+			// Behavior of sliding Div and show/hide-Buttons depending on option
+				document.getElementById("hideCoordSelection").style.display="inline-block";
+				document.getElementById("hideCoordSelection").innerHTML = "△";
+		}  // end of case 1 (=coordinates-Json)
+		break;
+
+		case 2: //(= Data file)
+		{
+			var propertyNames = Object.getOwnPropertyNames(zaehlstellen_data[0]) // array of properties of GeoJSON
+			var dateSelection = document.getElementById('dateSelect');
+
+			// clear all existing options
+			dateSelection.options.length = 0;
+
+			for (i=0; i < propertyNames.length; i++){
+				var opt = document.createElement("option");
+				opt.value= propertyNames[i];
+				opt.innerHTML = propertyNames[i];
+				dateSelection.appendChild(opt);
+			}
+
+			document.getElementById("hideDataSelection").style.display="inline-block";
+			document.getElementById("hideDataSelection").innerHTML = "△";
+		}	// end of case 2 (=Data-json)
+		break;
+
+	}// end of switch
+}
+
+//----------Populating Selections for ID and Coordinates after Drag&Drop--------------------------------------------------
+	function askFields(first_feature, option){
+		// @option:
+		//		1: Coordinates
+		// 		2: Data
+		if(option == 1){ // if Coordinates, then show/hide Coordinates, else Data selection
 		if (selectionStatus.coords == false){ // only show/hide when not already shown, happens when re-dragging data into drop-field
 			showCoordsSelection();
 		}
@@ -932,7 +1054,7 @@ function askFields(first_feature, option){
 		case 1:  // = coordinates-json
 		{
 			var coordIDSelection = document.getElementById('coordIDSelect');
-			var coordSelection = document.getElementById('coordSelect');
+			var coordSelection = document.getElementById('xSelect');
 			index = 0;
 			Object.keys(first_feature).forEach(function(prop) {  // prop = property name
 				//console.log(prop);
@@ -1021,8 +1143,8 @@ function showCoordsSelection(){
 	else {
 		document.getElementById("hideCoordSelection").innerHTML = "▽";
 		document.getElementById("hideCoordSelection").style.backgroundColor ="#A4C4E8";
-		document.getElementById('choseFieldDiv1').style.transform = "translateY(-45px)";
-		document.getElementById("menuBelowSelection").style.transform = "translateY(-210px)";
+		document.getElementById('choseFieldDiv1').style.transform = "translateY(-83px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(-248px)";
 		selectionStatus.coords = false;
 	}
 }
@@ -1039,15 +1161,17 @@ function showDateSelection(){
 	if (selectionStatus.date == false){
 		document.getElementById("hideDataSelection").innerHTML = "△";
 		document.getElementById("hideDataSelection").style.backgroundColor ="#4A74AA";
-		document.getElementById('choseFieldDiv2').style.transform = "translateY(23px)";
-		document.getElementById("menuBelowSelection").style.transform = "translateY(-140px)";
+		//document.getElementById('choseFieldDiv2').style.transform = "translateY(23px)";
+		//document.getElementById("menuBelowSelection").style.transform = "translateY(-140px)";
+		document.getElementById('choseFieldDiv2').style.transform = "translateY(-17px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(-180px)";
 		selectionStatus.date = true;
 	}
 	else {
 		document.getElementById("hideDataSelection").innerHTML = "▽";
 		document.getElementById("hideDataSelection").style.backgroundColor ="#A4C4E8";
-		document.getElementById('choseFieldDiv2').style.transform = "translateY(-45px)";
-		document.getElementById("menuBelowSelection").style.transform = "translateY(-205px)";
+		document.getElementById('choseFieldDiv2').style.transform = "translateY(-84px)";
+		document.getElementById("menuBelowSelection").style.transform = "translateY(-247px)";
 		selectionStatus.date = false;
 	}
 }
