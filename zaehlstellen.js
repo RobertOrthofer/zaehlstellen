@@ -424,10 +424,10 @@ function add_zaehlstellen(coords_json)
 			for(var i=1;i<headerLength;i++){ // for every date, last one is empty (because csv has )
 				var json_obj = {};
 				json_obj[dateName] = headers[i];  // headers is dates (top row of csv)
-				for(var j=1; j<splittedLinesArray.length; j++){ // for every zaehlstelle...
+				for(var j=0; j<splittedLinesArray.length; j++){ // for every zaehlstelle...
 					//console.log("j:  " + j);
-					var currentZaehlstelle = splittedLinesArray[j-1][0]; // takes name of current zaehlstelle (very left column of csv)
-					var currentValue = splittedLinesArray[j-1][i];
+					var currentZaehlstelle = splittedLinesArray[j][0]; // takes name of current zaehlstelle (very left column of csv)
+					var currentValue = splittedLinesArray[j][i];
 					json_obj[currentZaehlstelle] = parseInt(currentValue);
 				}
 				obj_array.push(json_obj);
