@@ -76,11 +76,11 @@ function add_zaehlstellen(coords_json)
 	//remove current coordinates, if existing
 
 	// save the current Selection to global variable selectedOptions, so they can only be changed with the apply button
-	var idField = document.getElementById("coordIDSelect").value.split(","); // array, because it might be nested
-	var coordsField = document.getElementById("xSelect").value.split(","); // array, because it might be nested
+	var idField = document.getElementById("coordIDSelect").value; // array, because it might be nested
+	//var coordsField = document.getElementById("xSelect").value.split(","); // array, because it might be nested
 	var epsgField = document.getElementById("epsgInput").value;
 	selectedOptions.coordID = idField;
-	selectedOptions.coordField = coordsField;
+	//selectedOptions.coordField = coordsField;
 	selectedOptions.epsg = epsgField;
 
 	// if coordinates are csv, make an aproppriate JSON with selected x and y coordinates and Match-ID as property
@@ -320,13 +320,14 @@ function add_zaehlstellen(coords_json)
 			var positionY = headers.indexOf(yColumn);
 
 			var obj_array = []
-			for(var i=1;i<lines.length;i++){
+			for(var i=1;i<lines.length-1;i++){
 				var json_obj = {"type": "Feature"};
 				var currentline=lines[i].split(",");
 				//for(var j=0;j<headers.length;j++){
 					json_obj["geometry"] = {
 							"type" : "Point",
-							"coordinates" : [currentline[positionX], currentline[positionY]]};
+							"coordinates" : [parseFloat(currentline[positionX]), parseFloat(currentline[positionY])]
+					};
 					json_obj["properties"] = {};
 					json_obj["properties"][matchID] = currentline[positionMatchID]; // get the name of zaehlstellen variable
 					obj_array.push(json_obj);
