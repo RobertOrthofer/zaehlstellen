@@ -662,7 +662,7 @@ function createPolyChart(selectedFeatures){
 	// Get Sreet Names
 	var selectedStreetNames = [];
 		for (i = 0; i < selectedFeatures.length; i++){
-			selectedStreetNames.push(selectedFeatures[i].getProperties().zaehlstelle);  // get all streetnames (= zaehlstellen) from selection
+			selectedStreetNames.push(selectedFeatures[i].getProperties()[selectedOptions.coordID]);  // get all streetnames (= zaehlstellen) from selection
 		};
 
 
